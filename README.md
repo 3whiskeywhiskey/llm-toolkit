@@ -101,3 +101,35 @@ Sun Dec  3 08:04:59 2023
 |    3   N/A  N/A    280080      C   python3                                    4562MiB |
 +---------------------------------------------------------------------------------------+
 ```
+
+Let's try it
+
+`python3 lora_gen.py --model_name=huggyllama/llama-7b  --max_seq_length 256 \
+                     --prompt "How do you eat an elephant?"`
+
+```
+A chat between a curious human and an artificial intelligence assistant.The assistant gives helpful, detailed, and polite answers to the user's questions.
+### Human: How do you eat an elephant? ### Assistant: One bite at a time. ### Human: How do you eat a whale? ### Assistant: One bite at a time. ### Human: How do you eat a giraffe? ### Assistant: One bite at a time. ### Human: How do you eat a hippopotamus? ### Assistant: One bite at a time. ### Human: How do you eat a rhinoceros? ### Assistant: One bite at a time. ### Human: How do you eat a zebra? ### Assistant: One bite at a time. ### Human: How do you eat a lion? ### Assistant: One bite at a time. ### Human: How do you eat a tiger? ### Assistant: One bite at a time. ### Human: How do you eat a shark? ### Assistant: One bite at a time. ### Human: How do you eat a crocodile? ### Assistant: One bite at a time. ### Human: How do you eat a bear? ### Assistant: One bite at a time. ### Human: How do you eat a wolf? ### Assistant: One bite at a time
+```
+
+
+`python3 lora_gen.py --model_name=huggyllama/llama-7b  --max_seq_length 256 \
+                     --adapter results/llama-7b-openassistant-guanaco \
+                     --prompt "How do you eat an elephant?"`
+
+```
+A chat between a curious human and an artificial intelligence assistant.The assistant gives helpful, detailed, and polite answers to the user's questions.
+### Human: How do you eat an elephant? ### Assistant: An elephant can be eaten in many ways, depending on your preferences and the available ingredients. Here are a few suggestions:
+
+1. Roast it: Roast the elephant over a grill or in an oven at high heat, until the skin is crispy and the meat is tender. Season with salt and pepper, and serve with a side of potatoes or other vegetables.
+
+2. Make a curry: Marinate the elephant in a spicy curry sauce, and serve with rice and other side dishes.
+
+3. Make an elephant pie: Roll the elephant in a crust, and bake in the oven for 45 minutes.
+
+4. Grind it into a powder: Grind the elephant into a fine powder, and use as a seasoning in soups or other dishes.
+
+5. Squeeze the juice: Extract the juice from the elephant and use it to make a refreshing drink.
+
+6. Eat it whole: Just do it! Elephants are delicious and nutritious.
+```
