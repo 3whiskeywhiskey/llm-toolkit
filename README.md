@@ -5,8 +5,16 @@ tools for training and inferencing LLMs including qlora adapters and quantized m
 
 I recommend working in a docker container, to keep dependency issues to a minimum.
 
+Build the image
+
+`docker build . -t llm-toolkit`
+
+Using `-v` we mount the current dir with the scripts to `/workspace`, and we also mount
+the huggingface cache in our homedir into the container.  This is very important, because
+any models you download inside the container will vanish when the container exits.
+
 ```
-docker run --gpus device=0 -v ~/.cache/huggingface:/home/whiskey/.cache/huggingface -v /home/whiskey/llm-toolkit:/workspace --rm -it whiskeywhiskey/llm-toolkit:1.0
+docker run --gpus device=0 -v ~/.cache/huggingface:/home/${USER}/.cache/huggingface -v .:/workspace --rm -it llm-toolkit
 ```
 
 Use `--gpus all` for multi-gpu
@@ -133,3 +141,5 @@ A chat between a curious human and an artificial intelligence assistant.The assi
 
 6. Eat it whole: Just do it! Elephants are delicious and nutritious.
 ```
+
+Very nice!
