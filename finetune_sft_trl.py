@@ -54,6 +54,7 @@ class ScriptArguments:
 
     model_name: Optional[str] = field(default="huggyllama/llama-7b", metadata={"help": "the model name"})
     dataset_name: Optional[str] = field(default="ybelkada/oasst1-tiny-subset", metadata={"help": "the dataset name"})
+    output_name: Optional[str] = field(default=None, metadata={"help": "Override name of output adapter"})
     use_8_bit: Optional[bool] = field(default=False, metadata={"help": "use 8 bit precision"})
     use_seq2seq_lm: Optional[bool] = field(default=False, metadata={"help": "use seq2seq LM"})
     use_4_bit: Optional[bool] = field(default=True, metadata={"help": "use 4 bit precision"})
@@ -64,6 +65,8 @@ class ScriptArguments:
     batch_size: Optional[int] = field(default=1, metadata={"help": "input batch size"})
     max_seq_length: Optional[int] = field(default=512, metadata={"help": "max sequence length"})
     optimizer_name: Optional[str] = field(default="adamw_hf", metadata={"help": "Optimizer name"})
+    resume: Optional[str] = field(default=None, metadata={"help": "Resume from checkpoint"})
+    max_steps: Optional[int] = field(default=1000, metadata={"help": "Maximum number of training steps"})
 
 def get_current_device():
     return Accelerator().process_index
@@ -71,7 +74,12 @@ def get_current_device():
 parser = HfArgumentParser(ScriptArguments)
 script_args = parser.parse_args_into_dataclasses()[0]
 
-dataset = load_dataset(script_args.dataset_name, split="train[:1%]")
+if script_args.output_name is None:
+    output_name = script_args.model_name.split('/')[-1] + '-' + script_args.dataset_name.split('/')[-1]
+else:
+    output_name = script_args.output_name
+
+dataset = load_dataset(script_args.dataset_name, split="train[:10%]")
 
 # We load the model
 if script_args.use_multi_gpu:
@@ -128,7 +136,7 @@ else:
 
 training_arguments = TrainingArguments(
     per_device_train_batch_size=script_args.batch_size,
-    max_steps=1000,
+    max_steps=script_args.max_steps,
     gradient_accumulation_steps=4,
     per_device_eval_batch_size=script_args.batch_size,
     output_dir="./results", 
@@ -147,7 +155,6 @@ trainer = SFTTrainer(
     args=training_arguments,
 )
 
-trainer.train()
-trainer.model.save_pretrained("./tmpresults")
+trainer.train(resume_from_checkpoint=script_args.resume)
 
-    # assert "adapter_model.bin" in os.listdir(tmp_dir)
+trainer.model.save_pretrained(f"./results/{output_name}")
