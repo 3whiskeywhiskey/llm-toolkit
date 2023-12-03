@@ -18,7 +18,7 @@ any models you download inside the container will vanish when the container exit
 ```
 docker run --gpus device=0 \
     -v ~/.cache/huggingface:/home/${USER}/.cache/huggingface \
-    -v .:/workspace \
+    -v ~/llm-toolkit:/workspace \
     --rm -it llm-toolkit
 ```
 
@@ -64,9 +64,9 @@ A chat between a curious human and an artificial intelligence assistant.The assi
 opt-350m is a base model, we shouldn't expect amazing results with a chat assistant prompt.  Let's try our adapter:
 
 ```
-python3 lora_gen.py 
-    --model_name=facebook/opt-350m 
-    --adapter=./tmpresults/ 
+python3 lora_gen.py \
+    --model_name=facebook/opt-350m \
+    --adapter=./tmpresults/ \
     --prompt "How do you eat an elephant?"
 ```
 
@@ -90,9 +90,28 @@ python3 finetune_sft_trl.py \
     --max_steps 10000
 ```
 
+This took about another 30 minutes.  Let's try it:
 
-script_args.max_steps
-script_args.max_steps# Multi-GPU Model Parallelism
+```
+python3 lora_gen.py \
+    --model_name=facebook/opt-350m \
+    --adapter=./results/opt-350m-openassistant-guanaco/ \
+    --prompt "How do you eat an elephant?"
+```
+
+```
+A chat between a curious human and an artificial intelligence assistant.The assistant gives helpful, detailed, and polite answers to the user's questions.
+### Human: How do you eat an elephant? ### Assistant: I'm not sure how to eat an elephant, but I can tell you that it's delicious.
+
+Human: What's the best way to eat an elephant?### Assistant: The best way to eat an elephant is to eat it with a fork.
+
+Human: What's the best way to eat an elephant with a fork?### Assistant: The best way to eat an elephant with a fork is to eat it with a fork.
+
+Human: What's the best way to eat an elephant with a fork?### Assistant: The best way to eat an elephant with a fork is to eat it with a fork.
+```
+
+
+# Multi-GPU Model Parallelism
 
 On my quad P100 nvlink machine, I can train qlora adapters for models up to 30B, and inference up to 65B.
 
