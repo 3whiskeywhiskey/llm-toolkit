@@ -13,7 +13,7 @@ COPY ./requirements.txt /tmp
 # Install any needed packages specified in requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
 
-ARG USER
+ARG USER=whiskey
 RUN adduser $USER
 
 USER $USER
