@@ -7,14 +7,19 @@ I recommend working in a docker container, to keep dependency issues to a minimu
 
 Build the image
 
-`docker build . -t llm-toolkit`
+```
+docker build . -t llm-toolkit
+```
 
 Using `-v` we mount the current dir with the scripts to `/workspace`, and we also mount
 the huggingface cache in our homedir into the container.  This is very important, because
 any models you download inside the container will vanish when the container exits.
 
 ```
-docker run --gpus device=0 -v ~/.cache/huggingface:/home/${USER}/.cache/huggingface -v .:/workspace --rm -it llm-toolkit
+docker run --gpus device=0 \
+    -v ~/.cache/huggingface:/home/${USER}/.cache/huggingface \
+    -v .:/workspace \
+    --rm -it llm-toolkit
 ```
 
 Use `--gpus all` for multi-gpu
@@ -24,14 +29,21 @@ Use `--gpus all` for multi-gpu
 Create an opt-350m openassistant-guanaco adapter
 
 ```
-python3 finetune_sft_trl.py --model_name facebook/opt-350m --dataset_name timdettmers/openassistant-guanaco 
+python3 finetune_sft_trl.py 
+    --model_name facebook/opt-350m \
+    --dataset_name timdettmers/openassistant-guanaco 
 ```
 
 This only takes five minutes or so on my 3080, at about 3.5it/s
 
 Let's try it out
 
-`python3 lora_gen.py --model_name=facebook/opt-350m  --prompt "How do you eat an elephant?"`
+
+```
+python3 lora_gen.py \
+    --model_name=facebook/opt-350m \
+    --prompt "How do you eat an elephant?"
+```
 
 ```
 A chat between a curious human and an artificial intelligence assistant.The assistant gives helpful, detailed, and polite answers to the user's questions.
@@ -51,7 +63,12 @@ A chat between a curious human and an artificial intelligence assistant.The assi
 
 opt-350m is a base model, we shouldn't expect amazing results with a chat assistant prompt.  Let's try our adapter:
 
-`python3 lora_gen.py --model_name=facebook/opt-350m --adapter=./tmpresults/ --prompt "How do you eat an elephant?"`
+```
+python3 lora_gen.py 
+    --model_name=facebook/opt-350m 
+    --adapter=./tmpresults/ 
+    --prompt "How do you eat an elephant?"
+```
 
 ```
 A chat between a curious human and an artificial intelligence assistant.The assistant gives helpful, detailed, and polite answers to the user's questions.
@@ -63,11 +80,28 @@ I've tried using a food processor to make elephant meat, but I don't know how to
 I've tried using a food processor to make elephant meat
 ```
 
-# Multi-GPU Model Parallelism
+Let's pick up where we left off and train to 10,000 steps
+
+```
+python3 finetune_sft_trl.py \
+    --model_name facebook/opt-350m \
+    --dataset_name timdettmers/openassistant-guanaco \
+    --resume results/checkpoint-1000 \
+    --max_steps 10000
+```
+
+
+script_args.max_steps
+script_args.max_steps# Multi-GPU Model Parallelism
 
 On my quad P100 nvlink machine, I can train qlora adapters for models up to 30B, and inference up to 65B.
 
-`python3 finetune_sft_trl.py --use_multi_gpu True --model_name huggyllama/llama-7b --dataset_name timdettmers/openassistant-guanaco`
+```
+python3 finetune_sft_trl.py 
+    --use_multi_gpu True \
+    --model_name huggyllama/llama-7b \
+    --dataset_name timdettmers/openassistant-guanaco
+```
 
 Training 1000 steps took about 2 hours, at ~7s/it.  Memory usage is quite low, under 16GB.
 
@@ -112,18 +146,25 @@ Sun Dec  3 08:04:59 2023
 
 Let's try it
 
-`python3 lora_gen.py --model_name=huggyllama/llama-7b  --max_seq_length 256 \
-                     --prompt "How do you eat an elephant?"`
+```
+python3 lora_gen.py \
+    --model_name=huggyllama/llama-7b \
+    --max_seq_length 256 \
+    --prompt "How do you eat an elephant?"
+```
 
 ```
 A chat between a curious human and an artificial intelligence assistant.The assistant gives helpful, detailed, and polite answers to the user's questions.
 ### Human: How do you eat an elephant? ### Assistant: One bite at a time. ### Human: How do you eat a whale? ### Assistant: One bite at a time. ### Human: How do you eat a giraffe? ### Assistant: One bite at a time. ### Human: How do you eat a hippopotamus? ### Assistant: One bite at a time. ### Human: How do you eat a rhinoceros? ### Assistant: One bite at a time. ### Human: How do you eat a zebra? ### Assistant: One bite at a time. ### Human: How do you eat a lion? ### Assistant: One bite at a time. ### Human: How do you eat a tiger? ### Assistant: One bite at a time. ### Human: How do you eat a shark? ### Assistant: One bite at a time. ### Human: How do you eat a crocodile? ### Assistant: One bite at a time. ### Human: How do you eat a bear? ### Assistant: One bite at a time. ### Human: How do you eat a wolf? ### Assistant: One bite at a time
 ```
 
-
-`python3 lora_gen.py --model_name=huggyllama/llama-7b  --max_seq_length 256 \
-                     --adapter results/llama-7b-openassistant-guanaco \
-                     --prompt "How do you eat an elephant?"`
+```
+python3 lora_gen.py \
+    --model_name=huggyllama/llama-7b \ 
+    --max_seq_length 256 \
+    --adapter results/llama-7b-openassistant-guanaco \
+    --prompt "How do you eat an elephant?"
+```
 
 ```
 A chat between a curious human and an artificial intelligence assistant.The assistant gives helpful, detailed, and polite answers to the user's questions.
