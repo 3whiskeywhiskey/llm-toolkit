@@ -125,8 +125,6 @@ python3 finetune_sft_trl.py
 Training 1000 steps took about 2 hours, at ~7s/it.  Memory usage is quite low, under 16GB.
 
 ```
-whiskey@deepmeme:/mnt/mldata/llm-toolkit$ nvidia-smi
-Sun Dec  3 08:04:59 2023
 +---------------------------------------------------------------------------------------+
 | NVIDIA-SMI 535.129.03             Driver Version: 535.129.03   CUDA Version: 12.2     |
 |-----------------------------------------+----------------------+----------------------+
@@ -203,3 +201,141 @@ A chat between a curious human and an artificial intelligence assistant.The assi
 ```
 
 Very nice!
+
+
+# Bigger?
+
+```
+python3 finetune_sft_trl.py \
+    --use_multi_gpu True \
+    --model_name ehartford/Wizard-Vicuna-30B-Uncensored \
+    --dataset_name timdettmers/openassistant-guanaco
+```
+
+Finetuning a 30B model runs pretty slow, 33s/it on my 4xP100's.  Estimating approx 9 hours for 1000 steps.
+
+```
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.129.03             Driver Version: 535.129.03   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  Tesla P100-SXM2-16GB           Off | 00000000:1A:00.0 Off |                    0 |
+| N/A   41C    P0              52W / 300W |  10694MiB / 16384MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+|   1  Tesla P100-SXM2-16GB           Off | 00000000:1C:00.0 Off |                    0 |
+| N/A   39C    P0              50W / 300W |  11390MiB / 16384MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+|   2  Tesla P100-SXM2-16GB           Off | 00000000:1D:00.0 Off |                    0 |
+| N/A   38C    P0             239W / 300W |  11390MiB / 16384MiB |    100%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+|   3  Tesla P100-SXM2-16GB           Off | 00000000:1E:00.0 Off |                    0 |
+| N/A   38C    P0              49W / 300W |  11894MiB / 16384MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|    0   N/A  N/A    875995      C   python3                                   10692MiB |
+|    1   N/A  N/A    875995      C   python3                                   11388MiB |
+|    2   N/A  N/A    875995      C   python3                                   11388MiB |
+|    3   N/A  N/A    875995      C   python3                                   11892MiB |
++---------------------------------------------------------------------------------------+
+```
+
+```
+whiskey@58cf920d255e:/workspace$ python3 lora_gen.py --model_name ehartford/Wizard-Vicuna-30B-Uncensored --max_seq_length 512
+Loading checkpoint shards: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 14/14 [02:05<00:00,  8.98s/it]
+A chat between a curious human and an artificial intelligence assistant.The assistant gives helpful, detailed, and polite answers to the user's questions.
+### Human: How do you make butter? ### Assistant: To make butter, you need cream, a container, and a little bit of patience. Here are the steps:
+
+1. Start with fresh, cold cream. You can use heavy cream or whipping cream, but the higher the fat content, the richer your butter will be.
+
+2. Pour the cream into a container and let it sit at room temperature for about an hour. This will help the cream come to a consistent temperature and make it easier to churn.
+
+3. Once the cream has warmed up, pour it into a mixing bowl or stand mixer. Attach the whisk or beater and start mixing on medium speed.
+
+4. As the cream starts to thicken, increase the speed of the mixer. You'll see the cream start to form clumps and separate from the buttermilk.
+
+5. Keep mixing until the butter forms into a solid mass and the buttermilk is completely separated.
+
+6. Drain the buttermilk from the bowl and rinse the butter under cold water until it's smooth and creamy.
+
+7. Salt the butter to taste, then shape it into a block or roll and wrap it in plastic wrap or wax paper.
+
+8. Chill the butter in the refrigerator for at least an hour to firm it up.
+
+And that's it! You've just made your own butter.
+```
+
+
+```
+whiskey@58cf920d255e:/workspace$ python3 lora_gen.py --model_name ehartford/Wizard-Vicuna-30B-Uncensored --adapter results/Wizard-Vicuna-30B-Uncensored-openassistant-guanaco/ --max_seq_length 512
+Loading checkpoint shards: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 14/14 [02:05<00:00,  9.00s/it]
+using adapter
+A chat between a curious human and an artificial intelligence assistant.The assistant gives helpful, detailed, and polite answers to the user's questions.
+### Human: How do you make butter? ### Assistant: To make butter, you will need:
+
+- 1 pint of heavy cream
+- 1/4 teaspoon of salt (optional)
+
+Here are the steps to make butter:
+
+1. Pour the heavy cream into a large mixing bowl or the bowl of a stand mixer.
+2. Whip the cream on medium-high speed until it becomes light and fluffy, about 5 minutes.
+3. Continue to whip the cream on medium-high speed until it starts to separate into butter and buttermilk, about 5-10 minutes.
+4. Once the butter has formed, stop the mixer and scrape the butter into a separate bowl.
+5. Rinse the mixing bowl with cold water to remove any remaining buttermilk.
+6. Pour the buttermilk into a separate bowl and discard.
+7. Add the salt to the butter and mix well.
+8. Shape the butter into a log or a block and wrap it in plastic wrap or parchment paper.
+9. Refrigerate the butter for at least 1 hour to firm it up.
+10. Use the butter as desired.
+
+Note: If you prefer a salted butter, add 1/4 teaspoon of salt to the cream before whipping.
+
+Enjoy your freshly made butter!
+```
+
+Both are good generations!  
+
+
+```
+
+### Human: How do you eat an elephant? 
+### Assistant: One bite at a time.
+### Human: What if you don't have a knife or fork?
+### Assistant: You can use your hands or a spoon.
+### Human: What if you don't have any utensils at all?
+### Assistant: You can use your teeth to tear off small pieces of the elephant and chew them.
+### Human: What if you don't have any teeth?
+### Assistant: You can use your hands to tear off small pieces of the elephant and swallow them whole.
+### Human: What if you don't have any hands?
+### Assistant: You can use your feet to tear off small pieces of the elephant and pick them up with your mouth.
+### Human: What if you don't have any feet?
+### Assistant: You can use your mouth to tear off small pieces of the elephant and swallow them whole.
+### Human: What if you don't have a mouth?
+### Assistant: You can use your nose to tear off small pieces of the elephant and swallow them whole.
+### Human: What if you don't have a nose?
+### Assistant: You can use your eyes to tear off small pieces of the elephant and swallow them whole.
+### Human: What if you don't have any eyes?
+### Assistant: You can use your ears to tear off small pieces of the elephant and swallow them whole.
+### Human: What if you don't have any ears?
+### Assistant: You can use your brain to tear off small pieces of the elephant and swallow them whole.
+### Human: What if you don't have a brain?
+### Assistant: You can use your heart to tear off small pieces of the elephant and swallow them whole.
+### Human: What if you don't have a heart?
+### Assistant: You can use your lungs to tear off small pieces of the elephant and swallow them whole.
+### Human: What if you don't have any lungs?
+### Assistant: You can use your stomach to tear off small pieces of the elephant and swallow them whole.
+### Human: What if you don't have a st
+
+```
